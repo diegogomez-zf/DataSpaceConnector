@@ -33,6 +33,7 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> extends Entity
 
     protected int state;
     protected int stateCount;
+    protected long stateTimestamp;
     protected Map<String, String> traceContext = new HashMap<>();
     protected String errorDetail;
     protected Clock clock;
@@ -48,6 +49,10 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> extends Entity
         return stateCount;
     }
 
+    public long getStateTimestamp() {
+        return stateTimestamp;
+    }
+
     @Override
     public Map<String, String> getTraceContext() {
         return Collections.unmodifiableMap(traceContext);
@@ -59,6 +64,15 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> extends Entity
 
     public void setErrorDetail(String errorDetail) {
         this.errorDetail = errorDetail;
+    }
+
+    /**
+     * Sets the state timestamp to the clock time.
+     *
+     * @see Builder#clock(Clock)
+     */
+    public void updateStateTimestamp() {
+        stateTimestamp = clock.millis();
     }
 
     public abstract T copy();

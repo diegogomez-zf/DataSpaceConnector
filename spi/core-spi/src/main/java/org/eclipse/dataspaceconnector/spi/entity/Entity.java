@@ -16,8 +16,6 @@
 package org.eclipse.dataspaceconnector.spi.entity;
 
 
-import java.time.Clock;
-
 /**
  * Base class for entities.
  */
@@ -25,8 +23,6 @@ public abstract class Entity<T extends Entity<T>> {
 
     protected String id;
     protected long createdTimestamp;
-    protected long stateTimestamp;
-    protected Clock clock;
 
     protected Entity() {
     }
@@ -35,16 +31,8 @@ public abstract class Entity<T extends Entity<T>> {
         return createdTimestamp;
     }
 
-    public long getStateTimestamp() {
-        return stateTimestamp;
-    }
-
     public String getId() {
         return id;
-    }
-
-    public void updateStateTimestamp() {
-        stateTimestamp = clock.millis();
     }
 
 }
