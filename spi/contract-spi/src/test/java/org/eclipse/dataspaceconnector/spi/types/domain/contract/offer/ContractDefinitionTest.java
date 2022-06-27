@@ -30,6 +30,7 @@ class ContractDefinitionTest {
         ObjectMapper mapper = new ObjectMapper();
         var definition = ContractDefinition.Builder.newInstance()
                 .id("1")
+                .createdTimestamp(0L)
                 .accessPolicyId(UUID.randomUUID().toString())
                 .contractPolicyId(UUID.randomUUID().toString())
                 .selectorExpression(AssetSelectorExpression.SELECT_ALL)

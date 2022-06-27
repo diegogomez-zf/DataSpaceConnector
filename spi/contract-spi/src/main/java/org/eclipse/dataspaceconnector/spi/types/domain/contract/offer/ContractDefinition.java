@@ -17,6 +17,7 @@ package org.eclipse.dataspaceconnector.spi.types.domain.contract.offer;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.eclipse.dataspaceconnector.spi.asset.AssetSelectorExpression;
+import org.eclipse.dataspaceconnector.spi.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -33,17 +34,12 @@ import java.util.Objects;
  * Note that the id must be a UUID.
  */
 @JsonDeserialize(builder = ContractDefinition.Builder.class)
-public class ContractDefinition {
-    private String id;
+public class ContractDefinition extends Entity {
     private String accessPolicyId;
     private String contractPolicyId;
     private AssetSelectorExpression selectorExpression;
 
     private ContractDefinition() {
-    }
-
-    public String getId() {
-        return id;
     }
 
     @NotNull
@@ -62,16 +58,20 @@ public class ContractDefinition {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ContractDefinition that = (ContractDefinition) o;
-        return Objects.equals(id, that.id) && Objects.equals(accessPolicyId, that.accessPolicyId) && Objects.equals(contractPolicyId, that.contractPolicyId) && Objects.equals(selectorExpression, that.selectorExpression);
+    public int hashCode() {
+        return Objects.hash(id, accessPolicyId, contractPolicyId, selectorExpression);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(id, accessPolicyId, contractPolicyId, selectorExpression);
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ContractDefinition that = (ContractDefinition) o;
+        return Objects.equals(id, that.id) && Objects.equals(accessPolicyId, that.accessPolicyId) && Objects.equals(contractPolicyId, that.contractPolicyId) && Objects.equals(selectorExpression, that.selectorExpression);
     }
 
     @JsonPOJOBuilder(withPrefix = "")
@@ -88,6 +88,11 @@ public class ContractDefinition {
 
         public Builder id(String id) {
             definition.id = id;
+            return this;
+        }
+
+        public Builder createdTimestamp(long createdTimestamp) {
+            definition.createdTimestamp = createdTimestamp;
             return this;
         }
 
