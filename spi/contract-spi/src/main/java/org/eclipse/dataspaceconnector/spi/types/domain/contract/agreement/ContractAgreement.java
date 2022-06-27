@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
+import org.eclipse.dataspaceconnector.spi.entity.Entity;
 import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,9 +29,8 @@ import java.util.Objects;
  * {@link ContractAgreement} to regulate data transfer between two parties.
  */
 @JsonDeserialize(builder = ContractAgreement.Builder.class)
-public class ContractAgreement {
+public class ContractAgreement extends Entity {
 
-    private final String id;
     private final String providerAgentId;
     private final String consumerAgentId;
     private final long contractSigningDate;
@@ -46,7 +46,8 @@ public class ContractAgreement {
                               long contractStartDate,
                               long contractEndDate,
                               @NotNull Policy policy,
-                              @NotNull String assetId) {
+                              @NotNull String assetId,
+                              long createdTimestamp) {
         this.id = Objects.requireNonNull(id);
         this.providerAgentId = Objects.requireNonNull(providerAgentId);
         this.consumerAgentId = Objects.requireNonNull(consumerAgentId);
@@ -55,16 +56,7 @@ public class ContractAgreement {
         this.contractEndDate = contractEndDate;
         this.assetId = Objects.requireNonNull(assetId);
         this.policy = Objects.requireNonNull(policy);
-    }
-
-    /**
-     * Unique identifier of the {@link ContractAgreement}.
-     *
-     * @return contract id
-     */
-    @NotNull
-    public String getId() {
-        return id;
+        this.createdTimestamp = createdTimestamp;
     }
 
     /**
@@ -168,6 +160,7 @@ public class ContractAgreement {
     public static class Builder {
 
         private String id;
+        private long createdTimestamp;
         private String providerAgentId;
         private String consumerAgentId;
         private long contractSigningDate;
@@ -186,6 +179,11 @@ public class ContractAgreement {
 
         public Builder id(String id) {
             this.id = id;
+            return this;
+        }
+
+        public Builder createdTimestamp(long createdTimestamp) {
+            this.createdTimestamp = createdTimestamp;
             return this;
         }
 
@@ -225,7 +223,7 @@ public class ContractAgreement {
         }
 
         public ContractAgreement build() {
-            return new ContractAgreement(id, providerAgentId, consumerAgentId, contractSigningDate, contractStartDate, contractEndDate, policy, assetId);
+            return new ContractAgreement(id, providerAgentId, consumerAgentId, contractSigningDate, contractStartDate, contractEndDate, policy, assetId, createdTimestamp);
         }
     }
 }
