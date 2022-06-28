@@ -29,10 +29,8 @@ import java.util.Objects;
  *
  * @param <T> implementation type ({@link StatefulEntity} sub-class). Used to define {@link #copy()} method.
  */
-public abstract class StatefulEntity<T extends StatefulEntity<T>> implements TraceCarrier {
+public abstract class StatefulEntity<T extends StatefulEntity<T>> extends Entity implements TraceCarrier {
 
-    protected String id;
-    protected long createdTimestamp;
     protected int state;
     protected int stateCount;
     protected long stateTimestamp;
@@ -41,10 +39,6 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> implements Tra
     protected Clock clock;
 
     protected StatefulEntity() {
-    }
-
-    public long getCreatedTimestamp() {
-        return createdTimestamp;
     }
 
     public int getState() {
@@ -81,17 +75,26 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> implements Tra
         stateTimestamp = clock.millis();
     }
 
+    public abstract T copy();
+
     protected void transitionTo(int targetState) {
         stateCount = state == targetState ? stateCount + 1 : 1;
         state = targetState;
         updateStateTimestamp();
     }
 
-    public String getId() {
-        return id;
+    protected <B extends Builder<T, B>> T copy(Builder<T, B> builder) {
+        return builder
+                .id(id)
+                .createdTimestamp(createdTimestamp)
+                .state(state)
+                .stateCount(stateCount)
+                .stateTimestamp(stateTimestamp)
+                .traceContext(traceContext)
+                .errorDetail(errorDetail)
+                .clock(clock)
+                .build();
     }
-
-    public abstract T copy();
 
     /**
      * Base Builder class for derived classes.
@@ -102,13 +105,13 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> implements Tra
      */
     protected abstract static class Builder<T extends StatefulEntity<T>, B extends Builder<T, B>> {
 
-        public abstract B self();
-
         protected final T entity;
 
         protected Builder(T entity) {
             this.entity = entity;
         }
+
+        public abstract B self();
 
         public B id(String id) {
             entity.id = id;
@@ -159,18 +162,5 @@ public abstract class StatefulEntity<T extends StatefulEntity<T>> implements Tra
             }
             return entity;
         }
-    }
-
-    protected <B extends Builder<T, B>> T copy(Builder<T, B> builder) {
-        return builder
-                .id(id)
-                .createdTimestamp(createdTimestamp)
-                .state(state)
-                .stateCount(stateCount)
-                .stateTimestamp(stateTimestamp)
-                .traceContext(traceContext)
-                .errorDetail(errorDetail)
-                .clock(clock)
-                .build();
     }
 }
