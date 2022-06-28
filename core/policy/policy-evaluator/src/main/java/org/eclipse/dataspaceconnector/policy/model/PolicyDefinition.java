@@ -17,6 +17,7 @@ package org.eclipse.dataspaceconnector.policy.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import org.eclipse.dataspaceconnector.spi.entity.Entity;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -32,8 +33,7 @@ import java.util.UUID;
  * <em>Many external Policy formats like ODRL also require policies to have an ID.</em>
  */
 @JsonDeserialize(builder = PolicyDefinition.Builder.class)
-public class PolicyDefinition {
-    private String uid;
+public class PolicyDefinition extends Entity {
     private Policy policy;
 
     private PolicyDefinition() {
@@ -44,8 +44,13 @@ public class PolicyDefinition {
     }
 
     @Override
+    public long getCreatedTimestamp() {
+        return createdTimestamp;
+    }
+
+    @Override
     public int hashCode() {
-        return Objects.hash(Objects.hash(uid), policy.hashCode());
+        return Objects.hash(Objects.hash(id), policy.hashCode());
     }
 
     @Override
@@ -57,11 +62,11 @@ public class PolicyDefinition {
             return false;
         }
         PolicyDefinition that = (PolicyDefinition) o;
-        return Objects.equals(uid, that.uid) && policy.equals(that.policy);
+        return Objects.equals(id, that.id) && policy.equals(that.policy);
     }
 
     public String getUid() {
-        return uid;
+        return id;
     }
 
     @JsonPOJOBuilder(withPrefix = "")
@@ -77,8 +82,8 @@ public class PolicyDefinition {
             return new Builder();
         }
 
-        public Builder uid(String uid) {
-            policyDefinition.uid = uid;
+        public Builder id(String id) {
+            policyDefinition.id = id;
             return this;
         }
 
@@ -87,9 +92,14 @@ public class PolicyDefinition {
             return this;
         }
 
+        public Builder createdTimestamp(long createdTimestamp) {
+            policyDefinition.createdTimestamp = createdTimestamp;
+            return this;
+        }
+
         public PolicyDefinition build() {
-            if (policyDefinition.uid == null) {
-                policyDefinition.uid = UUID.randomUUID().toString();
+            if (policyDefinition.id == null) {
+                policyDefinition.id = UUID.randomUUID().toString();
             }
             Objects.requireNonNull(policyDefinition.policy, "Policy cannot be null!");
             return policyDefinition;
