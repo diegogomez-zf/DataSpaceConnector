@@ -12,6 +12,7 @@
  *    Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
  */
 
+val awaitility: String by project
 val infoModelVersion: String by project
 val jerseyVersion: String by project
 val okHttpVersion: String by project
@@ -36,6 +37,7 @@ dependencies {
     testImplementation(project(":extensions:http"))
     testImplementation(project(":extensions:junit"))
     testImplementation("io.rest-assured:rest-assured:${restAssured}")
+    testImplementation("org.awaitility:awaitility:${awaitility}")
 }
 
 publishing {
