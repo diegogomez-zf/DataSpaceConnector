@@ -49,13 +49,12 @@ import org.junit.jupiter.api.Test;
 import java.time.Clock;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.concurrent.CompletableFuture.completedFuture;
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.eclipse.dataspaceconnector.spi.types.domain.transfer.TransferProcessStates.INITIAL;
 import static org.eclipse.dataspaceconnector.spi.types.domain.transfer.TransferProcessStates.UNSAVED;
 import static org.mockito.ArgumentMatchers.any;
@@ -104,11 +103,9 @@ class TransferProcessManagerImplIntegrationTest {
 
     @Test
     @DisplayName("Verify that no process 'starves' during two consecutive runs, when the batch size > number of processes")
-    void verifyProvision_shouldNotStarve() throws InterruptedException {
+    void verifyProvision_shouldNotStarve() {
         var numProcesses = TRANSFER_MANAGER_BATCHSIZE * 2;
-        var processesToProvision = new CountDownLatch(numProcesses);
         when(provisionManager.provision(any(), any(Policy.class))).thenAnswer(i -> {
-            processesToProvision.countDown();
             return completedFuture(List.of(ProvisionResponse.Builder.newInstance().resource(new TestProvisionedDataDestinationResource("any", "1")).build()));
         });
 
@@ -122,15 +119,17 @@ class TransferProcessManagerImplIntegrationTest {
 
         transferProcessManager.start();
 
-        assertThat(processesToProvision.await(10, SECONDS)).isTrue();
-        assertThat(processes).describedAs("All transfer processes state should be greater than INITIAL")
-                .allSatisfy(process -> {
-                    var id = process.getId();
-                    var storedProcess = store.find(id);
-                    assertThat(storedProcess).describedAs("Should exist in the TransferProcessStore").isNotNull();
-                    assertThat(storedProcess.getState()).isGreaterThan(INITIAL.code());
-                });
-        verify(provisionManager, times(numProcesses)).provision(any(), any());
+        await().untilAsserted(() ->
+        {
+            assertThat(processes).describedAs("All transfer processes state should be greater than INITIAL")
+                    .allSatisfy(process -> {
+                        var id = process.getId();
+                        var storedProcess = store.find(id);
+                        assertThat(storedProcess).describedAs("Should exist in the TransferProcessStore").isNotNull();
+                        assertThat(storedProcess.getState()).isGreaterThan(INITIAL.code());
+                    });
+            verify(provisionManager, times(numProcesses)).provision(any(), any());
+        });
     }
 
     private ProvisionedResourceSet provisionedResourceSet() {
