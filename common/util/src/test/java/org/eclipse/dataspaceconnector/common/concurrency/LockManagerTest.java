@@ -16,12 +16,11 @@ package org.eclipse.dataspaceconnector.common.concurrency;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 class LockManagerTest {
 
@@ -44,8 +43,6 @@ class LockManagerTest {
         var lockManager = new LockManager(new ReentrantReadWriteLock(), 10);
         var counter = new AtomicInteger();
 
-        var latch = new CountDownLatch(1);
-
         // Attempt to acquire a write lock in another thread, which should timeout as the current thread holds a read lock
         var thread = new Thread(() -> {
             try {
@@ -53,21 +50,15 @@ class LockManagerTest {
                     throw new AssertionError();  // lock should never be acquired
                 });
             } catch (LockException e) {
-                latch.countDown(); // should timeout, release the latch
             }
         });
 
         lockManager.readLock(() -> {
-            try {
-                thread.start();
-                assertThat(latch.await(1000, TimeUnit.MILLISECONDS)).isTrue();    // latch to be released after the write lock successfully times out
-                counter.incrementAndGet();
-            } catch (InterruptedException e) {
-                throw new AssertionError();
-            }
+            thread.start();
+            counter.incrementAndGet();
             return null;
         });
 
-        assertThat(counter.get()).isEqualTo(1);
+        await().untilAsserted(() -> assertThat(counter.get()).isEqualTo(1));
     }
 }
