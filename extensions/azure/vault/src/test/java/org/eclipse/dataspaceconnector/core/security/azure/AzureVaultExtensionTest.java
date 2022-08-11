@@ -22,13 +22,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class AzureVaultExtensionTest {
@@ -60,58 +60,49 @@ class AzureVaultExtensionTest {
     }
 
     @Test
-    void onlyCertificateProvided_authenticateWithCertificate() throws InterruptedException {
+    void onlyCertificateProvided_authenticateWithCertificate() {
         when(context.getSetting("edc.vault.certificate", null)).thenReturn(CERTIFICATE_PATH);
-
-        var l = new CountDownLatch(1);
 
         try (MockedStatic<AzureVault> utilities = mockStatic(AzureVault.class)) {
             utilities.when(() -> AzureVault.authenticateWithCertificate(monitor, CLIENT_ID, TENANT_ID, CERTIFICATE_PATH, KEYVAULT_NAME))
                     .then(i -> {
-                        l.countDown();
                         return null;
                     });
 
             extension.initialize(context);
-
-            assertThat(l.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
+            await().untilAsserted(() -> verify(context, atLeastOnce()));
         }
     }
 
     @Test
-    void onlySecretProvided_authenticateWithSecret() throws InterruptedException {
+    void onlySecretProvided_authenticateWithSecret() {
         when(context.getSetting("edc.vault.clientsecret", null)).thenReturn(CLIENT_SECRET);
-        var l = new CountDownLatch(1);
 
         try (MockedStatic<AzureVault> utilities = mockStatic(AzureVault.class)) {
             utilities.when(() -> AzureVault.authenticateWithSecret(monitor, CLIENT_ID, TENANT_ID, CLIENT_SECRET, KEYVAULT_NAME))
                     .then(i -> {
-                        l.countDown();
                         return null;
                     });
 
             extension.initialize(context);
-
-            assertThat(l.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
+            await().untilAsserted(() -> verify(context, atLeastOnce()));
         }
     }
 
     @Test
-    void bothSecretAndCertificateProvided_authenticateWithCertificate() throws InterruptedException {
+    void bothSecretAndCertificateProvided_authenticateWithCertificate() {
         when(context.getSetting("edc.vault.certificate", null)).thenReturn(CERTIFICATE_PATH);
         when(context.getSetting("edc.vault.clientsecret", null)).thenReturn(CLIENT_SECRET);
-        var l = new CountDownLatch(1);
 
         try (MockedStatic<AzureVault> utilities = mockStatic(AzureVault.class)) {
             utilities.when(() -> AzureVault.authenticateWithCertificate(monitor, CLIENT_ID, TENANT_ID, CERTIFICATE_PATH, KEYVAULT_NAME))
                     .then(i -> {
-                        l.countDown();
                         return null;
                     });
 
             extension.initialize(context);
 
-            assertThat(l.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)).isTrue();
+            await().untilAsserted(() -> verify(context, atLeastOnce()));
         }
     }
 }

@@ -12,6 +12,7 @@
  *
  */
 
+val awaitility: String by project
 val rsApi: String by project
 val mockitoVersion: String by project
 val azureIdentityVersion: String by project
@@ -35,6 +36,7 @@ dependencies {
     testImplementation("com.azure.resourcemanager:azure-resourcemanager-keyvault:${azureResourceManagerVersion}")
 
     testImplementation("org.mockito:mockito-inline:${mockitoVersion}")
+    testImplementation("org.awaitility:awaitility:${awaitility}")
 }
 
 
