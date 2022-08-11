@@ -18,8 +18,11 @@ plugins {
     `maven-publish`
 }
 
+val awaitility: String by project
+
 dependencies {
     api(project(":spi:core-spi"))
+    testImplementation("org.awaitility:awaitility:${awaitility}")
 }
 
 publishing {
