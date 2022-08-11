@@ -61,10 +61,14 @@ public class PolicyDefinitionEventDispatchTest {
         var policyDefinition = PolicyDefinition.Builder.newInstance().policy(Policy.Builder.newInstance().build()).build();
 
         service.create(policyDefinition);
-        service.deleteById(policyDefinition.getUid());
 
         await().untilAsserted(() -> {
             verify(eventSubscriber).on(isA(PolicyDefinitionCreated.class));
+        });
+
+        service.deleteById(policyDefinition.getUid());
+
+        await().untilAsserted(() -> {
             verify(eventSubscriber).on(isA(PolicyDefinitionDeleted.class));
         });
     }

@@ -62,10 +62,14 @@ public class AssetEventDispatchTest {
         var dataAddress = DataAddress.Builder.newInstance().type("any").build();
 
         service.create(asset, dataAddress);
-        service.delete(asset.getId());
 
         await().untilAsserted(() -> {
             verify(eventSubscriber).on(isA(AssetCreated.class));
+        });
+
+        service.delete(asset.getId());
+
+        await().untilAsserted(() -> {
             verify(eventSubscriber).on(isA(AssetDeleted.class));
         });
     }
