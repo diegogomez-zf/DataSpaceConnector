@@ -45,12 +45,9 @@ class LockManagerTest {
 
         // Attempt to acquire a write lock in another thread, which should timeout as the current thread holds a read lock
         var thread = new Thread(() -> {
-            try {
-                lockManager.writeLock(() -> {
-                    throw new AssertionError();  // lock should never be acquired
-                });
-            } catch (LockException e) {
-            }
+            lockManager.writeLock(() -> {
+                throw new AssertionError();  // lock should never be acquired
+            });
         });
 
         lockManager.readLock(() -> {
