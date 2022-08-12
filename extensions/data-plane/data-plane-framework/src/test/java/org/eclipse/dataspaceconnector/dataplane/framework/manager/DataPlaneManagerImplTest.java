@@ -26,13 +26,10 @@ import org.eclipse.dataspaceconnector.spi.types.domain.transfer.DataFlowRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -43,11 +40,12 @@ class DataPlaneManagerImplTest {
     TransferService transferService = mock(TransferService.class);
     DataPlaneStore store = new InMemoryDataPlaneStore(10);
     DataFlowRequest request = createRequest();
-    CountDownLatch latch = new CountDownLatch(1);
     TransferServiceRegistry registry = mock(TransferServiceRegistry.class);
+    DataPlaneManagerImpl dataPlaneManager = createDataPlaneManager();
 
     @BeforeEach
     public void setUp() {
+        dataPlaneManager.start();
         when(registry.resolveTransferService(request))
                 .thenReturn(transferService);
     }
@@ -56,8 +54,7 @@ class DataPlaneManagerImplTest {
      * Verifies a request is enqueued, dequeued, and dispatched to the pipeline service.
      */
     @Test
-    void verifyWorkDispatch() throws InterruptedException {
-        var dataPlaneManager = createDataPlaneManager();
+    void verifyWorkDispatch() {
 
         when(registry.resolveTransferService(request))
                 .thenReturn(transferService);
@@ -65,22 +62,22 @@ class DataPlaneManagerImplTest {
                 .thenReturn(true);
 
         when(transferService.transfer(isA(DataFlowRequest.class))).thenAnswer(i -> {
-            latch.countDown();
             return completedFuture(Result.success("ok"));
         });
 
-        performTransfer(dataPlaneManager);
+        dataPlaneManager.initiateTransfer(request);
 
-        verify(registry).resolveTransferService(eq(request));
-        verify(transferService).transfer(isA(DataFlowRequest.class));
+        await().untilAsserted(() -> {
+            verify(registry).resolveTransferService(eq(request));
+            verify(transferService).transfer(isA(DataFlowRequest.class));
+        });
     }
 
     /**
      * Verifies that the dispatch thread survives an error thrown by a worker.
      */
     @Test
-    void verifyWorkDispatchError() throws InterruptedException {
-        var dataPlaneManager = createDataPlaneManager();
+    void verifyWorkDispatchError() {
 
         when(transferService.canHandle(request))
                 .thenReturn(true);
@@ -89,39 +86,35 @@ class DataPlaneManagerImplTest {
                 .thenAnswer(i -> {
                     throw new RuntimeException("Test exception");
                 }).thenAnswer((i -> {
-                    latch.countDown();
                     return completedFuture(Result.success("ok"));
                 }));
-
 
         dataPlaneManager.start();
 
         dataPlaneManager.initiateTransfer(request);
         dataPlaneManager.initiateTransfer(request);
 
-        assertThat(latch.await(10000, TimeUnit.MILLISECONDS)).isTrue();
-
-        dataPlaneManager.stop();
-
-        verify(transferService, times(2)).transfer(request);
+        await().untilAsserted(() -> verify(transferService, times(2)).transfer(request));
     }
 
     @Test
-    void verifyWorkDispatch_onUnavailableTransferService_completesTransfer() throws InterruptedException {
-        // Modify store used in createDataPlaneManager()
-        store = mock(DataPlaneStore.class);
-
-        var dataPlaneManager = createDataPlaneManager();
+    void verifyWorkDispatch_onUnavailableTransferService_completesTransfer() {
 
         when(transferService.canHandle(isA(DataFlowRequest.class)))
                 .thenReturn(false);
 
-        doAnswer(i -> {
-            latch.countDown();
-            return null;
-        }).when(store).completed(request.getProcessId());
+        dataPlaneManager.initiateTransfer(request);
 
-        performTransfer(dataPlaneManager);
+        await().untilAsserted(() -> assertThat(store.getState(request.getProcessId())).isEqualTo(DataPlaneStore.State.COMPLETED));
+    }
+
+    DataFlowRequest createRequest() {
+        return DataFlowRequest.Builder.newInstance()
+                .id("1")
+                .processId("1")
+                .sourceDataAddress(DataAddress.Builder.newInstance().type("type").build())
+                .destinationDataAddress(DataAddress.Builder.newInstance().type("type").build())
+                .build();
     }
 
     private DataPlaneManagerImpl createDataPlaneManager() {
@@ -134,25 +127,6 @@ class DataPlaneManagerImplTest {
                 .store(store)
                 .monitor(mock(Monitor.class))
                 .build();
-    }
-
-    DataFlowRequest createRequest() {
-        return DataFlowRequest.Builder.newInstance()
-                .id("1")
-                .processId("1")
-                .sourceDataAddress(DataAddress.Builder.newInstance().type("type").build())
-                .destinationDataAddress(DataAddress.Builder.newInstance().type("type").build())
-                .build();
-    }
-
-    void performTransfer(DataPlaneManagerImpl dataPlaneManager) throws InterruptedException {
-        dataPlaneManager.start();
-
-        dataPlaneManager.initiateTransfer(request);
-
-        assertThat(latch.await(10000, TimeUnit.MILLISECONDS)).isTrue();
-
-        dataPlaneManager.stop();
     }
 
 }
