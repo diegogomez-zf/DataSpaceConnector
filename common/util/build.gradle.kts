@@ -18,6 +18,7 @@ plugins {
     `maven-publish`
 }
 
+val awaitility: String by project
 val jupiterVersion: String by project
 val mockitoVersion: String by project
 val okHttpVersion: String by project
@@ -28,6 +29,7 @@ dependencies {
     testFixturesRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:${jupiterVersion}")
     testFixturesImplementation("com.squareup.okhttp3:okhttp:${okHttpVersion}")
     testImplementation("org.junit-pioneer:junit-pioneer:1.7.1")
+    testImplementation("org.awaitility:awaitility:${awaitility}")
 }
 
 publishing {
