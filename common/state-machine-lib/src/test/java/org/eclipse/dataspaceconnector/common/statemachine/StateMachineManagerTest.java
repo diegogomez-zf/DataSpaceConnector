@@ -25,7 +25,6 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -69,9 +68,6 @@ class StateMachineManagerTest {
     void shouldNotWaitForSomeTimeIfTheresAtLeastOneProcessedEntity() {
         var processor = mock(StateProcessor.class);
         when(processor.process()).thenReturn(1L);
-        doAnswer(i -> {
-            return 1L;
-        }).when(waitStrategy).success();
         var stateMachine = StateMachineManager.Builder.newInstance("test", monitor, instrumentation, waitStrategy)
                 .processor(processor)
                 .build();
