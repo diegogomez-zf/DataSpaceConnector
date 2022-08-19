@@ -88,9 +88,7 @@ class StateMachineManagerTest {
         var processor = mock(StateProcessor.class);
         when(processor.process()).thenReturn(0L);
         var waitStrategy = mock(WaitStrategy.class);
-        doAnswer(i -> {
-            return 0L;
-        }).when(waitStrategy).waitForMillis();
+        when(waitStrategy.waitForMillis()).thenReturn(0L);
         var stateMachine = StateMachineManager.Builder.newInstance("test", monitor, instrumentation, waitStrategy)
                 .processor(processor)
                 .build();
@@ -118,9 +116,7 @@ class StateMachineManagerTest {
     void shouldWaitRetryTimeWhenAnExceptionIsThrownByAnProcessor() {
         var processor = mock(StateProcessor.class);
         when(processor.process()).thenThrow(new EdcException("exception")).thenReturn(0L);
-        when(waitStrategy.retryInMillis()).thenAnswer(i -> {
-            return 1L;
-        });
+        when(waitStrategy.retryInMillis()).thenReturn(1L);
         var stateMachine = StateMachineManager.Builder.newInstance("test", monitor, instrumentation, waitStrategy)
                 .processor(processor)
                 .build();
