@@ -30,7 +30,6 @@ import java.util.Map;
 import static org.awaitility.Awaitility.await;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -49,13 +48,6 @@ public class AssetEventDispatchTest {
 
     @Test
     void shouldDispatchEventsOnAssetCreationAndDeletion(AssetService service, EventRouter eventRouter) {
-        doAnswer(i -> {
-            return null;
-        }).when(eventSubscriber).on(isA(AssetCreated.class));
-
-        doAnswer(i -> {
-            return null;
-        }).when(eventSubscriber).on(isA(AssetDeleted.class));
 
         eventRouter.register(eventSubscriber);
         var asset = Asset.Builder.newInstance().id("assetId").build();
