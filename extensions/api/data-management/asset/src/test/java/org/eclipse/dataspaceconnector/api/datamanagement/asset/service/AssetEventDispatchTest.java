@@ -55,15 +55,15 @@ public class AssetEventDispatchTest {
 
         service.create(asset, dataAddress);
 
-        await().untilAsserted(() -> {
-            verify(eventSubscriber).on(isA(AssetCreated.class));
-        });
+        await().untilAsserted(() ->
+                verify(eventSubscriber).on(isA(AssetCreated.class))
+        );
 
         service.delete(asset.getId());
 
-        await().untilAsserted(() -> {
-            verify(eventSubscriber).on(isA(AssetDeleted.class));
-        });
+        await().untilAsserted(() ->
+                verify(eventSubscriber).on(isA(AssetDeleted.class))
+        );
     }
 
 }
