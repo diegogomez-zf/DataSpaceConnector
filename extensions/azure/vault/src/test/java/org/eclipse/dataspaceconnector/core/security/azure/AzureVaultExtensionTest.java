@@ -19,7 +19,6 @@ import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
 
 import java.util.UUID;
 
@@ -27,7 +26,6 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,6 +37,7 @@ class AzureVaultExtensionTest {
     private static final String CLIENT_SECRET = UUID.randomUUID().toString();
     private static final String CERTIFICATE_PATH = UUID.randomUUID().toString();
     private static final long TIMEOUT_MS = 500;
+    AzureVault vault;
     private Monitor monitor;
     private ServiceExtensionContext context;
     private AzureVaultExtension extension;
@@ -63,30 +62,16 @@ class AzureVaultExtensionTest {
     void onlyCertificateProvided_authenticateWithCertificate() {
         when(context.getSetting("edc.vault.certificate", null)).thenReturn(CERTIFICATE_PATH);
 
-        try (MockedStatic<AzureVault> utilities = mockStatic(AzureVault.class)) {
-            utilities.when(() -> AzureVault.authenticateWithCertificate(monitor, CLIENT_ID, TENANT_ID, CERTIFICATE_PATH, KEYVAULT_NAME))
-                    .then(i -> {
-                        return null;
-                    });
-
-            extension.initialize(context);
-            await().untilAsserted(() -> verify(context, atLeastOnce()));
-        }
+        extension.initialize(context);
+        await().untilAsserted(() -> verify(context, atLeastOnce()));
     }
 
     @Test
     void onlySecretProvided_authenticateWithSecret() {
         when(context.getSetting("edc.vault.clientsecret", null)).thenReturn(CLIENT_SECRET);
 
-        try (MockedStatic<AzureVault> utilities = mockStatic(AzureVault.class)) {
-            utilities.when(() -> AzureVault.authenticateWithSecret(monitor, CLIENT_ID, TENANT_ID, CLIENT_SECRET, KEYVAULT_NAME))
-                    .then(i -> {
-                        return null;
-                    });
-
-            extension.initialize(context);
-            await().untilAsserted(() -> verify(context, atLeastOnce()));
-        }
+        extension.initialize(context);
+        await().untilAsserted(() -> verify(context, atLeastOnce()));
     }
 
     @Test
@@ -94,15 +79,8 @@ class AzureVaultExtensionTest {
         when(context.getSetting("edc.vault.certificate", null)).thenReturn(CERTIFICATE_PATH);
         when(context.getSetting("edc.vault.clientsecret", null)).thenReturn(CLIENT_SECRET);
 
-        try (MockedStatic<AzureVault> utilities = mockStatic(AzureVault.class)) {
-            utilities.when(() -> AzureVault.authenticateWithCertificate(monitor, CLIENT_ID, TENANT_ID, CERTIFICATE_PATH, KEYVAULT_NAME))
-                    .then(i -> {
-                        return null;
-                    });
+        extension.initialize(context);
+        await().untilAsserted(() -> verify(context, atLeastOnce()));
 
-            extension.initialize(context);
-
-            await().untilAsserted(() -> verify(context, atLeastOnce()));
-        }
     }
 }
