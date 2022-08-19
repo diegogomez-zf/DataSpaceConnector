@@ -83,11 +83,8 @@ class DataPlaneManagerImplTest {
                 .thenReturn(true);
 
         when(transferService.transfer(request))
-                .thenAnswer(i -> {
-                    throw new RuntimeException("Test exception");
-                }).thenAnswer((i -> {
-                    return completedFuture(Result.success("ok"));
-                }));
+                .thenThrow(new RuntimeException("Test exception"))
+                .thenAnswer((i -> completedFuture(Result.success("ok"))));
 
         dataPlaneManager.start();
 
