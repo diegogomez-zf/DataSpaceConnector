@@ -30,7 +30,6 @@ import java.util.Map;
 import static org.awaitility.Awaitility.await;
 import static org.eclipse.dataspaceconnector.junit.testfixtures.TestUtils.getFreePort;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -49,28 +48,21 @@ public class PolicyDefinitionEventDispatchTest {
 
     @Test
     void shouldDispatchEventOnPolicyDefinitionCreationAndDeletion(PolicyDefinitionService service, EventRouter eventRouter) {
-        doAnswer(i -> {
-            return null;
-        }).when(eventSubscriber).on(isA(PolicyDefinitionCreated.class));
-
-        doAnswer(i -> {
-            return null;
-        }).when(eventSubscriber).on(isA(PolicyDefinitionDeleted.class));
 
         eventRouter.register(eventSubscriber);
         var policyDefinition = PolicyDefinition.Builder.newInstance().policy(Policy.Builder.newInstance().build()).build();
 
         service.create(policyDefinition);
 
-        await().untilAsserted(() -> {
-            verify(eventSubscriber).on(isA(PolicyDefinitionCreated.class));
-        });
+        await().untilAsserted(() ->
+                verify(eventSubscriber).on(isA(PolicyDefinitionCreated.class))
+        );
 
         service.deleteById(policyDefinition.getUid());
 
-        await().untilAsserted(() -> {
-            verify(eventSubscriber).on(isA(PolicyDefinitionDeleted.class));
-        });
+        await().untilAsserted(() ->
+                verify(eventSubscriber).on(isA(PolicyDefinitionDeleted.class))
+        );
     }
 
 }
