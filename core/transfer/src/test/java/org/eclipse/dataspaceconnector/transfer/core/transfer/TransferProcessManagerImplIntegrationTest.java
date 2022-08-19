@@ -119,8 +119,7 @@ class TransferProcessManagerImplIntegrationTest {
 
         transferProcessManager.start();
 
-        await().untilAsserted(() ->
-        {
+        await().untilAsserted(() -> {
             assertThat(processes).describedAs("All transfer processes state should be greater than INITIAL")
                     .allSatisfy(process -> {
                         var id = process.getId();
