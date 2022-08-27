@@ -21,7 +21,7 @@ plugins {
 val awaitility: String by project
 
 dependencies {
-    api(project(":spi:core-spi"))
+    api(project(":spi:common:core-spi"))
     testImplementation("org.awaitility:awaitility:${awaitility}")
 }
 
