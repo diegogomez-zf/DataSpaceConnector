@@ -23,7 +23,7 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: Run Checkstyle
@@ -32,7 +32,7 @@ jobs:
   Dependency-analysis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: Dependency rules report # possible severity values: <'fail'|'warn'|'ignore'>
@@ -50,7 +50,7 @@ jobs:
     env:
       JACOCO: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: Run unit tests
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Test Helm chart in minikube
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: Install and start minikube
@@ -100,7 +100,7 @@ jobs:
           AZURITE_ACCOUNTS: account1:key1;account2:key2
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: Azure Storage Tests
@@ -139,7 +139,7 @@ jobs:
       COSMOS_URL: ${{ secrets.COSMOS_URL }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: Azure CosmosDB Tests
@@ -164,7 +164,7 @@ jobs:
           MINIO_ROOT_PASSWORD: password
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: AWS Tests
@@ -179,7 +179,7 @@ jobs:
       - name: reset permissions to permit checkout (because the omejdn volumes)
         run: sudo chown -R $USER:$USER ${{ github.workspace }}
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - run: |
@@ -203,7 +203,7 @@ jobs:
           POSTGRES_PASSWORD: password
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: Postgresql Tests
@@ -225,7 +225,7 @@ jobs:
           VAULT_TOKEN: test-token
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: Hashicorp Vault Integration Tests
@@ -236,7 +236,7 @@ jobs:
   End-To-End-Tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: End to End Integration Tests
@@ -256,7 +256,7 @@ jobs:
       JACOCO: true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: Component Tests
@@ -269,7 +269,7 @@ jobs:
       JACOCO: true
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: Component Tests
@@ -281,7 +281,7 @@ jobs:
   OpenTelemetry-Integration-Tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: Download opentelemetry javaagent
@@ -325,7 +325,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/setup-build
 
       - name: 'Az CLI login'
@@ -397,7 +397,7 @@ jobs:
     if: always()
     steps:
       # Sources are needed for Codecov report
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Download Artifacts
         uses: actions/download-artifact@v3
         with:
